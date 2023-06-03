@@ -104,6 +104,8 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-cv-bridge
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
 
+    printenv | grep -i ROS
+    
     section
 
 }
