@@ -52,22 +52,61 @@ install_gstreamer(){
 
 install_build_dependencies(){
 
-    ${SUDO} apt install -y build-essential cmake unzip pkg-config
-    ${SUDO} apt install -y libjpeg-dev libpng-dev libtiff-dev
-    ${SUDO} apt install -y libavcodec-dev libavformat-dev libswscale-dev
-    ${SUDO} apt install -y libgtk2.0-dev libcanberra-gtk*
-    ${SUDO} apt install -y libxvidcore-dev libx264-dev libgtk-3-dev
-    ${SUDO} apt install -y libtbb2 libtbb-dev libdc1394-22-dev
-    ${SUDO} apt install -y libv4l-dev v4l-utils
-    ${SUDO} apt install -y libavresample-dev libvorbis-dev libxine2-dev
-    ${SUDO} apt install -y libfaac-dev libmp3lame-dev libtheora-dev
-    ${SUDO} apt install -y libopencore-amrnb-dev libopencore-amrwb-dev
-    ${SUDO} apt install -y libopenblas-dev libatlas-base-dev libblas-dev
-    ${SUDO} apt install -y liblapack-dev libeigen3-dev gfortran
-    ${SUDO} apt install -y libhdf5-dev protobuf-compiler
-    ${SUDO} apt install -y libprotobuf-dev libgoogle-glog-dev libgflags-dev
-    ${SUDO} apt install -y libudev-dev
-    ${SUDO} apt install -y libusb-1.0-0-dev
+    ${SUDO} apt install -y build-essential cmake || echo "******* cmake install has failed *******"
+    ${SUDO} apt install -y build-essential unzip || echo "******* unzip install has failed *******"
+    ${SUDO} apt install -y build-essential pkg-config || echo "******* pkconfig install has failed *******"
+
+    ${SUDO} apt install -y libjpeg-dev || echo "******* libjpeg-dev install has failed *******"
+    ${SUDO} apt install -y libpng-dev || echo "******* libpng-dev install has failed *******"
+    ${SUDO} apt install -y libtiff-dev || echo "******* libtiff-dev install has failed *******"
+
+    ${SUDO} apt install -y libavcodec-dev || echo "******* libavcodec-dev install has failed *******"
+    ${SUDO} apt install -y libavformat-dev || echo "******* libavformat-dev  install has failed *******"
+    ${SUDO} apt install -y libswscale-dev || echo "******* libswscale-dev install has failed *******"
+
+    ${SUDO} apt install -y libgtk2.0-dev || echo "******* libgtk2.0-dev install has failed *******"
+    ${SUDO} apt install -y libcanberra-gtk* || echo "******* libcanberra-gtk install has failed *******"
+
+    ${SUDO} apt install -y libxvidcore-dev || echo "******* libxvidcore-dev install has failed *******"
+    ${SUDO} apt install -y libx264-dev || echo "******* libx264-dev install has failed *******"
+    ${SUDO} apt install -y libgtk-3-dev || echo "******* libgtk-3-dev install has failed *******"
+
+    ${SUDO} apt install -y libtbb2  || echo "******* libtbb2 install has failed *******"
+    ${SUDO} apt install -y libtbb-dev  || echo "******* libtbb-dev install has failed *******"
+
+    ${SUDO} apt install -y libv4l-dev || echo "******* libv4l-dev install has failed *******"
+    ${SUDO} apt install -y v4l-utils || echo "******* v4l-utils install has failed *******"
+
+    ${SUDO} apt install -y i2ctools || echo "******* i2ctools install has failed *******"
+
+    ${SUDO} apt install -y libavresample-dev || echo "******* libavresample-dev install has failed *******"
+    ${SUDO} apt install -y libvorbis-dev || echo "******* libvorbis-dev install has failed *******"
+    ${SUDO} apt install -y libxine2-dev || echo "******* libxine2-dev install has failed *******"
+
+    ${SUDO} apt install -y libfaac-dev || echo "******* libfaac-dev install has failed *******"
+    ${SUDO} apt install -y libmp3lame-dev || echo "******* libmp3lame-dev install has failed *******"
+    ${SUDO} apt install -y libtheora-dev || echo "******* libtheora-dev install has failed *******"
+
+    ${SUDO} apt install -y libopencore-amrnb-dev || echo "******* libopencore-amrnb-dev install has failed *******"
+    ${SUDO} apt install -y libopencore-amrwb-dev || echo "******* libopencore-amrwb-dev install has failed *******"
+
+    ${SUDO} apt install -y libopenblas-dev || echo "******* libopenblas-dev install has failed *******"
+    ${SUDO} apt install -y libatlas-base-dev || echo "******* libatlas-base-dev install has failed *******"
+    ${SUDO} apt install -y libblas-dev || echo "******* libblas-dev install has failed *******"
+    ${SUDO} apt install -y liblapack-dev || echo "******* liblapack-dev install has failed *******"
+    ${SUDO} apt install -y libeigen3-dev || echo "******* libeigen3-dev install has failed *******"
+    ${SUDO} apt install -y gfortran || echo "******* gfortran install has failed *******"
+
+    ${SUDO} apt install -y libhdf5-dev || echo "******* libhdf5-dev install has failed *******"
+    ${SUDO} apt install -y protobuf-compiler || echo "******* protobuf-compiler install has failed *******"
+
+    ${SUDO} apt install -y libprotobuf-dev || echo "******* libprotobuf-dev install has failed *******"
+    ${SUDO} apt install -y libgoogle-glog-dev || echo "******* libgoogle-glog-dev install has failed *******"
+    ${SUDO} apt install -y libgflags-dev || echo "******* libgflags-dev install has failed *******"
+
+    ${SUDO} apt install -y libudev-dev || echo "******* libudev-dev install has failed *******"
+    ${SUDO} apt install -y libusb-1.0-0-dev || echo "******* libusb-1.0-0-dev install has failed *******"
+
 }
 
 
@@ -184,10 +223,10 @@ set_on_automatic_login(){
 
 restart(){
 
-    if [ $device_type == 'operator' ]
-        then
-            set_on_automatic_login
-    fi
+    #if [ $device_type == 'operator' ]
+    #    then
+    #        set_on_automatic_login
+    #fi
 
     section
     echo "ending installation, reboot system after update"
