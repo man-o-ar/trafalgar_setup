@@ -255,7 +255,7 @@ while getopts r:d:i flag
     do
         case "${flag}" in
             r) ros_version=${OPTARG};;
-            o) device_type=${OPTARG};;
+            d) device_type=${OPTARG};;
             i) device_index=${OPTARG};;
         esac
     done
