@@ -11,6 +11,8 @@ section(){
 
 set_python3_as_default(){
 
+    cd $HOME/
+
     section
     echo "Starting python 3 config as default"
     section
@@ -21,13 +23,15 @@ set_python3_as_default(){
 
 install_pip_dependencies(){
 
+    cd $HOME/
+
     section
     echo "Starting pip installation"
     section
 
-    ${SUDO} apt install -y python3-dev python3-numpy python3-pip
+    ${SUDO} apt install -y python3-dev python3-numpy python3-pip 
 
-    pip install pyserial
+    pip install pyserial opencv-python
 
 }
 
@@ -44,24 +48,11 @@ install_gstreamer(){
 
 }
 
-install_libusb(){
-
-    section
-    echo "Starting libusb installation"
-    section
-
-    cd $HOME/
-    ${SUDO} apt install -y libudev-dev
-    ${SUDO} apt install -y libusb-1.0-0-dev
-
-    #${SUDO} export LDFLAGS='-L/usr/local/lib/'
-
-}
 
 
 install_build_dependencies(){
 
-    ${SUDO} apt install -y build-essential cmake git unzip pkg-config
+    ${SUDO} apt install -y build-essential cmake unzip pkg-config
     ${SUDO} apt install -y libjpeg-dev libpng-dev libtiff-dev
     ${SUDO} apt install -y libavcodec-dev libavformat-dev libswscale-dev
     ${SUDO} apt install -y libgtk2.0-dev libcanberra-gtk*
@@ -75,7 +66,8 @@ install_build_dependencies(){
     ${SUDO} apt install -y liblapack-dev libeigen3-dev gfortran
     ${SUDO} apt install -y libhdf5-dev protobuf-compiler
     ${SUDO} apt install -y libprotobuf-dev libgoogle-glog-dev libgflags-dev
-
+    ${SUDO} apt install -y libudev-dev
+    ${SUDO} apt install -y libusb-1.0-0-dev
 }
 
 
@@ -90,10 +82,10 @@ install_ros2(){
 
     locale  # verify settings
 
-    ${SUDO} apt install software-properties-common
+    ${SUDO} apt install -y software-properties-common
     ${SUDO} add-apt-repository universe
 
-    ${SUDO} apt update && ${SUDO} apt install curl -y
+    ${SUDO} apt update && ${SUDO} apt install -y curl
     ${SUDO} curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | ${SUDO} tee /etc/apt/sources.list.d/ros2.list > /dev/null
@@ -117,6 +109,7 @@ install_ros2(){
 }
 
 
+
 set_ros_workspace(){
 
     section
@@ -134,6 +127,12 @@ set_ros_workspace(){
     fi
 
     cd ~/manoar_ros_ws/
+
+    source /opt/ros/$ros_version/setup.bash
+
+    ${SUDO} rosdep init
+    ${SUDO} rosdep update
+
     rosdep install -i --from-path src --rosdistro $ros_version -y
     colcon build --symlink-install
 
@@ -146,7 +145,9 @@ set_ros_service(){
     section
     echo "Starting DRONE service script installation"
     section
-     
+    
+    cd $HOME/
+
     if [ $device_type == 'operator' ]
     then
 
@@ -165,14 +166,33 @@ set_ros_service(){
 }
 
 
+set_on_automatic_login(){
+
+    cd $HOME/
+
+    section
+    echo "please modify your settings to enable automatic login"
+    section
+    ${SUDO} nano /etc/gdm3/custom.conf
+    
+    echo "disabling screen lock"
+    gsettings set org.gnome.desktop.screensaver lock-enabled false
+
+}
 
 restart(){
+
+    if [ $device_type == 'operator' ]
+        then
+            set_on_automatic_login
+    fi
 
     section
     echo "ending installation, reboot system after update"
     section
 
     cd $HOME/
+
     ${SUDO} apt update
     ${SUDO} apt upgrade
     ${SUDO} reboot
@@ -211,13 +231,13 @@ if [ $device_type == 'operator' ]
 fi
 echo "device_index: $device_index";
 
+cd $HOME/
 sudo apt update
 
 install_build_dependencies
 set_python3_as_default
 install_pip_dependencies
 install_gstreamer
-install_libusb
 
 install_ros2
 set_ros_workspace
