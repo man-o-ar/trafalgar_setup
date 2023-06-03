@@ -153,11 +153,11 @@ set_ros_service(){
     if [ $device_type == 'operator' ]
     then
 
-        sudo cp ~/manoar_ros_ws/src/trafalgar_operator_v0/service/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
+        sudo cp ~/manoar_ros_ws/src/trafalgar_operator_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
         ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
     
     else
-        sudo cp ~/manoar_ros_ws/src/trafalgar_drone_v0/service/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
+        sudo cp ~/manoar_ros_ws/src/trafalgar_drone_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
     fi
 
     systemctl enable trafalgar.service
