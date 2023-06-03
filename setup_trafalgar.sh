@@ -77,7 +77,7 @@ install_build_dependencies(){
     ${SUDO} apt install -y libv4l-dev || echo "******* libv4l-dev install has failed *******"
     ${SUDO} apt install -y v4l-utils || echo "******* v4l-utils install has failed *******"
 
-    ${SUDO} apt install -y i2ctools || echo "******* i2ctools install has failed *******"
+    ${SUDO} apt install -y i2c-tools || echo "******* i2c-tools install has failed *******"
 
     ${SUDO} apt install -y libavresample-dev || echo "******* libavresample-dev install has failed *******"
     ${SUDO} apt install -y libvorbis-dev || echo "******* libvorbis-dev install has failed *******"
