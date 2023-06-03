@@ -130,7 +130,7 @@ install_ros2(){
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | ${SUDO} tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
     ${SUDO} apt update
-    ${SUDO} apt upgrade
+    ${SUDO} apt upgrade -y
 
     ${SUDO} apt install -y ros-$ros_version-ros-base
     ${SUDO} apt install -y ros-dev-tools
@@ -143,8 +143,6 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-cv-bridge
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
 
-    printenv | grep -i ROS
-    
     section
 
 }
@@ -171,8 +169,8 @@ set_ros_workspace(){
 
     source /opt/ros/$ros_version/setup.bash
 
-    ${SUDO} rosdep init
-    ${SUDO} rosdep update
+    rosdep init
+    rosdep update
 
     rosdep install -i --from-path src --rosdistro $ros_version -y
     colcon build --symlink-install
@@ -235,7 +233,7 @@ restart(){
     cd $HOME/
 
     ${SUDO} apt update
-    ${SUDO} apt upgrade
+    ${SUDO} apt upgrade -y
     ${SUDO} reboot
 
 
