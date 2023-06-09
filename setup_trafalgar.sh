@@ -107,6 +107,7 @@ install_build_dependencies(){
     ${SUDO} apt install -y libudev-dev || echo "******* libudev-dev install has failed *******"
     ${SUDO} apt install -y libusb-1.0-0-dev || echo "******* libusb-1.0-0-dev install has failed *******"
 
+    
 }
 
 
@@ -155,8 +156,8 @@ set_ros_workspace(){
     echo "Starting DRONE service script installation"
     section
     
-    mkdir -p ~/manoar_ros_ws/src
-    cd ~/manoar_ros_ws/src
+    mkdir -p ~/manoar_rov_ws/src
+    cd ~/manoar_rov_ws/src
 
     if [ $device_type == 'operator' ]
     then
@@ -165,7 +166,7 @@ set_ros_workspace(){
         git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
     fi
 
-    cd ~/manoar_ros_ws/
+    cd ~/manoar_rov_ws/
 
     source /opt/ros/$ros_version/setup.bash
 
@@ -189,12 +190,13 @@ set_ros_service(){
 
     if [ $device_type == 'operator' ]
     then
-
-        sudo cp ~/manoar_ros_ws/src/trafalgar_operator_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
+        ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
+        ${SUDO} echo "unclutter -idle 0" >> ~/.config/lxsession/LXDE/autostart
+        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_operator_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
         ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
     
     else
-        sudo cp ~/manoar_ros_ws/src/trafalgar_drone_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
+        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_drone_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
     fi
 
     systemctl enable trafalgar.service
