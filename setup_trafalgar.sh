@@ -210,6 +210,13 @@ set_ros_service(){
 }
 
 
+install_ac1300_driver(){
+    cd $HOME/
+    git clone https://github.com/morrownr/88x2bu-20210702.git
+    cd 88x2bu-20210702/
+    sudo ./install-driver.sh
+
+}
 
 restart(){
 
@@ -269,5 +276,7 @@ install_gstreamer
 install_ros2
 set_ros_workspace
 set_ros_service
+
+install_ac1300_driver
 
 restart
