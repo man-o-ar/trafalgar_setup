@@ -159,21 +159,23 @@ set_ros_workspace(){
     mkdir -p ~/manoar_rov_ws/src
     cd ~/manoar_rov_ws/src
 
-    if [ $device_type == 'operator' ]
+    if [ {$device_type} == 'operator' ]
     then
         git clone https://github.com/man-o-ar/trafalgar_operator_v0.git
+        
     else
         git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
     fi
 
+    cp ~/manoar_rov_ws/src/trafalgar_{$device_type}_v0/launch/device_{$device_index}_launch.py ~/manoar_rov_ws/src/trafalgar_{$device_type}_v0/launch/device_{$device_index}_launch.py 
     cd ~/manoar_rov_ws/
 
-    source /opt/ros/$ros_version/setup.bash
+    source /opt/ros/{$ros_version}/setup.bash
 
     rosdep init
     rosdep update
 
-    rosdep install -i --from-path src --rosdistro $ros_version -y
+    rosdep install -i --from-path src --rosdistro {$ros_version} -y
     colcon build --symlink-install
 
     section
@@ -188,45 +190,29 @@ set_ros_service(){
     
     cd $HOME/
 
+    ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_{$device_type}_v0/service/{$ros_version}/trafalgar.service /etc/systemd/trafalgar.service
+    ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
     if [ $device_type == 'operator' ]
     then
         ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
-        ${SUDO} echo "unclutter -idle 0" >> ~/.config/lxsession/LXDE/autostart
-        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_operator_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
-        ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-    
-    else
-        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_drone_v0/service/$ros_version/trafalgar_{$device_index}.service /etc/systemd/trafalgar.service
+        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_{$device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
+
+        systemctl enable cursorHide.service
+        systemctl start cursorHide.service
+        
     fi
 
     systemctl enable trafalgar.service
     systemctl start trafalgar.service
     #systemctl daemon-reload
 
-    
 }
 
 
-set_on_automatic_login(){
-
-    cd $HOME/
-
-    section
-    echo "please modify your settings to enable automatic login"
-    section
-    ${SUDO} nano /etc/gdm3/custom.conf
-    
-    echo "disabling screen lock"
-    gsettings set org.gnome.desktop.screensaver lock-enabled false
-
-}
 
 restart(){
 
-    #if [ $device_type == 'operator' ]
-    #    then
-    #        set_on_automatic_login
-    #fi
 
     section
     echo "ending installation, reboot system after update"
@@ -237,7 +223,6 @@ restart(){
     ${SUDO} apt update
     ${SUDO} apt upgrade -y
     ${SUDO} reboot
-
 
 }
 
@@ -270,6 +255,7 @@ if [ $device_type == 'operator' ]
     else
         echo "Starting DRONE Installation..."
 fi
+
 echo "device_index: $device_index";
 
 cd $HOME/
