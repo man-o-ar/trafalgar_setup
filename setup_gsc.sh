@@ -21,15 +21,20 @@ set_python3_as_default(){
 
 install_pip_dependencies(){
 
+    cd $HOME/
+
     section
     echo "Starting pip installation"
     section
 
-    ${SUDO} apt install -y python3-dev python3-numpy python3-pip
-
-    pip install pyserial
+    ${SUDO} apt install -y python3-dev python3-numpy python3-pip 
+    ${SUDO} apt install -y python3-tk
+    
+    pip3 install pyserial opencv-python tk customtkinter Pillow
+    
 
 }
+
 
 install_gstreamer(){
 
@@ -44,26 +49,65 @@ install_gstreamer(){
 
 }
 
-
 install_build_dependencies(){
 
-    ${SUDO} apt install -y build-essential cmake git unzip pkg-config
-    ${SUDO} apt install -y libjpeg-dev libpng-dev libtiff-dev
-    ${SUDO} apt install -y libavcodec-dev libavformat-dev libswscale-dev
-    ${SUDO} apt install -y libgtk2.0-dev libcanberra-gtk*
-    ${SUDO} apt install -y libxvidcore-dev libx264-dev libgtk-3-dev
-    ${SUDO} apt install -y libtbb2 libtbb-dev libdc1394-22-dev
-    ${SUDO} apt install -y libv4l-dev v4l-utils
-    ${SUDO} apt install -y libavresample-dev libvorbis-dev libxine2-dev
-    ${SUDO} apt install -y libfaac-dev libmp3lame-dev libtheora-dev
-    ${SUDO} apt install -y libopencore-amrnb-dev libopencore-amrwb-dev
-    ${SUDO} apt install -y libopenblas-dev libatlas-base-dev libblas-dev
-    ${SUDO} apt install -y liblapack-dev libeigen3-dev gfortran
-    ${SUDO} apt install -y libhdf5-dev protobuf-compiler
-    ${SUDO} apt install -y libprotobuf-dev libgoogle-glog-dev libgflags-dev
+    ${SUDO} apt install -y build-essential cmake || echo "******* cmake install has failed *******"
+    ${SUDO} apt install -y build-essential unzip || echo "******* unzip install has failed *******"
+    ${SUDO} apt install -y build-essential pkg-config || echo "******* pkconfig install has failed *******"
 
+    ${SUDO} apt install -y libjpeg-dev || echo "******* libjpeg-dev install has failed *******"
+    ${SUDO} apt install -y libpng-dev || echo "******* libpng-dev install has failed *******"
+    ${SUDO} apt install -y libtiff-dev || echo "******* libtiff-dev install has failed *******"
+
+    ${SUDO} apt install -y libavcodec-dev || echo "******* libavcodec-dev install has failed *******"
+    ${SUDO} apt install -y libavformat-dev || echo "******* libavformat-dev  install has failed *******"
+    ${SUDO} apt install -y libswscale-dev || echo "******* libswscale-dev install has failed *******"
+
+    ${SUDO} apt install -y libgtk2.0-dev || echo "******* libgtk2.0-dev install has failed *******"
+    ${SUDO} apt install -y libcanberra-gtk* || echo "******* libcanberra-gtk install has failed *******"
+
+    ${SUDO} apt install -y libxvidcore-dev || echo "******* libxvidcore-dev install has failed *******"
+    ${SUDO} apt install -y libx264-dev || echo "******* libx264-dev install has failed *******"
+    ${SUDO} apt install -y libgtk-3-dev || echo "******* libgtk-3-dev install has failed *******"
+
+    ${SUDO} apt install -y libtbb2  || echo "******* libtbb2 install has failed *******"
+    ${SUDO} apt install -y libtbb-dev  || echo "******* libtbb-dev install has failed *******"
+
+    ${SUDO} apt install -y libv4l-dev || echo "******* libv4l-dev install has failed *******"
+    ${SUDO} apt install -y v4l-utils || echo "******* v4l-utils install has failed *******"
+
+    ${SUDO} apt install -y i2c-tools || echo "******* i2c-tools install has failed *******"
+
+    ${SUDO} apt install -y libavresample-dev || echo "******* libavresample-dev install has failed *******"
+    ${SUDO} apt install -y libvorbis-dev || echo "******* libvorbis-dev install has failed *******"
+    ${SUDO} apt install -y libxine2-dev || echo "******* libxine2-dev install has failed *******"
+
+    ${SUDO} apt install -y libfaac-dev || echo "******* libfaac-dev install has failed *******"
+    ${SUDO} apt install -y libmp3lame-dev || echo "******* libmp3lame-dev install has failed *******"
+    ${SUDO} apt install -y libtheora-dev || echo "******* libtheora-dev install has failed *******"
+
+    ${SUDO} apt install -y libopencore-amrnb-dev || echo "******* libopencore-amrnb-dev install has failed *******"
+    ${SUDO} apt install -y libopencore-amrwb-dev || echo "******* libopencore-amrwb-dev install has failed *******"
+
+    ${SUDO} apt install -y libopenblas-dev || echo "******* libopenblas-dev install has failed *******"
+    ${SUDO} apt install -y libatlas-base-dev || echo "******* libatlas-base-dev install has failed *******"
+    ${SUDO} apt install -y libblas-dev || echo "******* libblas-dev install has failed *******"
+    ${SUDO} apt install -y liblapack-dev || echo "******* liblapack-dev install has failed *******"
+    ${SUDO} apt install -y libeigen3-dev || echo "******* libeigen3-dev install has failed *******"
+    ${SUDO} apt install -y gfortran || echo "******* gfortran install has failed *******"
+
+    ${SUDO} apt install -y libhdf5-dev || echo "******* libhdf5-dev install has failed *******"
+    ${SUDO} apt install -y protobuf-compiler || echo "******* protobuf-compiler install has failed *******"
+
+    ${SUDO} apt install -y libprotobuf-dev || echo "******* libprotobuf-dev install has failed *******"
+    ${SUDO} apt install -y libgoogle-glog-dev || echo "******* libgoogle-glog-dev install has failed *******"
+    ${SUDO} apt install -y libgflags-dev || echo "******* libgflags-dev install has failed *******"
+
+    ${SUDO} apt install -y libudev-dev || echo "******* libudev-dev install has failed *******"
+    ${SUDO} apt install -y libusb-1.0-0-dev || echo "******* libusb-1.0-0-dev install has failed *******"
+
+    
 }
-
 
 install_ros2(){
 
@@ -76,16 +120,16 @@ install_ros2(){
 
     locale  # verify settings
 
-    ${SUDO} apt install software-properties-common
+    ${SUDO} apt install -y software-properties-common
     ${SUDO} add-apt-repository universe
 
-    ${SUDO} apt update && ${SUDO} apt install curl -y
+    ${SUDO} apt update && ${SUDO} apt install -y curl
     ${SUDO} curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | ${SUDO} tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
     ${SUDO} apt update
-    ${SUDO} apt upgrade
+    ${SUDO} apt upgrade -y
 
     ${SUDO} apt install -y ros-$ros_version-ros-base
     ${SUDO} apt install -y ros-dev-tools
@@ -97,9 +141,9 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-image-tools
     ${SUDO} apt install -y ros-$ros_version-cv-bridge
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
-    ${SUDO} apt install -y jstest-gtk
-    ${SUDO} apt install -y ros-$ros_version-joy
-    ${SUDO} apt install -y ros-$ros_version-joystick-drivers
+    ${SUDO} apt install ros-$ros_version-rmw-cyclonedds-cpp
+
+    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
 
     section
 

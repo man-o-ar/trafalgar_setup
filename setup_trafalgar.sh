@@ -31,7 +31,14 @@ install_pip_dependencies(){
 
     ${SUDO} apt install -y python3-dev python3-numpy python3-pip 
 
-    pip install pyserial opencv-python
+    pip3 install pyserial opencv-python
+
+    if [ $device_type == 'operator' ]
+    then
+        pip3 install tk customtkinter Pillow
+        ${SUDO} apt install -y python3-tk
+    fi
+    
 
 }
 
@@ -143,6 +150,9 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-image-tools
     ${SUDO} apt install -y ros-$ros_version-cv-bridge
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
+    
+    ${SUDO} apt install ros-$ros_version-rmw-cyclonedds-cpp
+    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
 
     section
 
@@ -159,7 +169,7 @@ set_ros_workspace(){
     mkdir -p ~/manoar_rov_ws/src
     cd ~/manoar_rov_ws/src
 
-    if [ {$device_type} == 'operator' ]
+    if [ $device_type == 'operator' ]
     then
         git clone https://github.com/man-o-ar/trafalgar_operator_v0.git
         
@@ -167,15 +177,15 @@ set_ros_workspace(){
         git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
     fi
 
-    cp ~/manoar_rov_ws/src/trafalgar_{$device_type}_v0/launch/device_{$device_index}_launch.py ~/manoar_rov_ws/src/trafalgar_{$device_type}_v0/launch/device_{$device_index}_launch.py 
+    cp ~/manoar_rov_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py ~/manoar_rov_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py 
     cd ~/manoar_rov_ws/
 
-    source /opt/ros/{$ros_version}/setup.bash
+    source /opt/ros/${ros_version}/setup.bash
 
     rosdep init
     rosdep update
 
-    rosdep install -i --from-path src --rosdistro {$ros_version} -y
+    rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
 
     section
@@ -190,13 +200,13 @@ set_ros_service(){
     
     cd $HOME/
 
-    ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_{$device_type}_v0/service/{$ros_version}/trafalgar.service /etc/systemd/trafalgar.service
+    ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
     ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
     if [ $device_type == 'operator' ]
     then
         ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
-        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_{$device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
+        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_${device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
 
         systemctl enable cursorHide.service
         systemctl start cursorHide.service
