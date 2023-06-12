@@ -151,7 +151,10 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-cv-bridge
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
     
-    ${SUDO} apt install ros-$ros_version-rmw-cyclonedds-cpp
+    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
+    echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
+    
+    ${SUDO} apt install -y ros-$ros_version-rmw-cyclonedds-cpp
     echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
 
     section
