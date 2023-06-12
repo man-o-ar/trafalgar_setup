@@ -11,7 +11,7 @@ section(){
 
 set_python3_as_default(){
 
-    cd
+    cd $HOME
 
     section
     echo "Set python 3 config as default"
@@ -23,7 +23,7 @@ set_python3_as_default(){
 
 install_pip_dependencies(){
 
-    cd
+    cd $HOME
 
     section
     echo "install pip and depedencies"
@@ -48,8 +48,7 @@ install_gstreamer(){
     echo "install gstreamer"
     section
     
-
-    cd
+    cd $HOME
 
     ${SUDO} apt install -y gstreamer1.0-tools gstreamer1.0-nice gstreamer1.0-alsa gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio libsoup2.4-dev libjson-glib-dev
     ${SUDO} apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev libgstreamer-plugins-bad1.0-dev
@@ -164,10 +163,10 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-cv-bridge
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
     
-    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
-    echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
-    
+    echo 'source /opt/ros/$ros_version/setup.bash' >> ~/.bashrc
+        
     ${SUDO} apt install -y ros-$ros_version-rmw-cyclonedds-cpp
+    echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
     echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
 
     section
@@ -181,10 +180,19 @@ set_ros_workspace(){
     section
     echo "install trafalgar ros2 workspace"
     section
-    
-    mkdir -p ~/trafalgar_ws/src
 
-    cd ~/trafalgar_ws/src
+    cd $HOME
+
+    trafalgar_workspace=$HOME/trafalgar_ws
+
+    if [ -d $trafalgar_workspace ] 
+    then
+        ${SUDO} rm -rf trafalgar_workspace
+    fi  
+
+    mkdir -p $HOME/trafalgar_ws/src
+
+    cd $trafalgar_workspace/src
 
     if [ $device_type == 'operator' ]
     then
@@ -194,13 +202,24 @@ set_ros_workspace(){
         git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
     fi
 
-    cp ~/trafalgar_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py ~/trafalgar_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py 
-    cd ~/trafalgar_ws/
+    cd $HOME
+    
+    launch_index=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py
+    launch_source=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_launch.py 
+
+    if cmp -s $launch_index $launch_source
+    then
+        echo "the launch files are identical, pass that step"
+    else
+        cp $launch_index $launch_source
+    fi
+
+    cd $trafalgar_workspace
 
     source /opt/ros/${ros_version}/setup.bash
-
-    rosdep init
+    
     rosdep update
+    rosdep init
 
     rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
@@ -215,23 +234,22 @@ set_ros_service(){
     echo "install trafalgar service script"
     section
     
-    cd
+    cd $HOME
 
-    ${SUDO} cp ~/trafalgar_ws/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
+    ${SUDO} cp ${HOME}/trafalgar_ws/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
     ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
     if [ $device_type == 'operator' ]
     then
         ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
-        ${SUDO} cp ~/trafalgar_ws/src/trafalgar_${device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
-
-        systemctl enable cursorHide.service
-        systemctl start cursorHide.service
-        
+        unclutter -idle 0
+        #${SUDO} cp ${HOME}/trafalgar_ws/src/trafalgar_${device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
+        #${SUDO} systemctl enable cursorHide.service
+        #${SUDO} systemctl start cursorHide.service 
     fi
 
-    systemctl enable trafalgar.service
-    systemctl start trafalgar.service
+    ${SUDO} systemctl enable trafalgar.service
+    ${SUDO} systemctl start trafalgar.service
     #systemctl daemon-reload
 
 }
@@ -243,10 +261,25 @@ install_ac1300_driver(){
     echo "install ac1300 driver"
     section
 
-    cd
-    git clone https://github.com/morrownr/88x2bu-20210702.git
-    cd 88x2bu-20210702/
-    sudo ./install-driver.sh
+    while true; do
+        read -p "Voulez-vous procéder à l'installation du driver ? (o/n) " answer
+        case "$answer" in
+            o)
+                echo "La réponse est 'oui'."
+                cd $SUDO
+                git clone https://github.com/morrownr/88x2bu-20210702.git        
+                cd $HOME/88x2bu-20210702
+                ${SUDO} ./install-driver.sh
+                break
+                ;;
+            n)
+                break
+                ;;
+            *)
+            echo "Veuillez répondre par 'o' ou 'n'."
+            ;;
+        esac
+    done
 
 }
 
@@ -257,14 +290,27 @@ restart(){
     echo "ending installation, reboot system after update"
     section
 
-    cd
-
+    cd $HOME
     ${SUDO} apt update
     ${SUDO} apt upgrade -y
-    ${SUDO} reboot
+
+    while true; do
+        read -p "Voulez-vous procéder au redémarrage ? (o/n) " answer
+        case "$answer" in
+            o)
+                ${SUDO} reboot
+                break
+                ;;
+            n)
+                break
+                ;;
+            *)
+            echo "Veuillez répondre par 'o' ou 'n'."
+            ;;
+        esac
+    done
 
 }
-
 
 
 SUDO=""
@@ -272,8 +318,9 @@ if [[ $EUID -ne 0 ]]; then
   SUDO="sudo -E"
 fi
 
-
-
+ros_version="humble" 
+device_type="drone"
+device_index="0"
 
 while getopts r:d:i flag
     do
@@ -285,21 +332,10 @@ while getopts r:d:i flag
     done
 
 
-
-echo "ros_version_selected: $ros_version";
-
-if [ $device_type == 'operator' ]
-    then
-        echo "Starting CONTROLLER Installation..."
-    else
-        echo "Starting DRONE Installation..."
-fi
-
-echo "device_index: $device_index";
-
-cd
-
-sudo apt update
+echo "Starting installation..."
+echo "device: $device_type";
+echo "index: $device_index";
+echo "ros_version: $ros_version";
 
 install_build_dependencies
 set_python3_as_default

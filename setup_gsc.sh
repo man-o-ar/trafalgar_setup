@@ -157,22 +157,67 @@ install_ros2(){
 set_ros_workspace(){
 
     section
-    echo "Starting DRONE service script installation"
+    echo "install trafalgar ros2 workspace"
     section
-    
-    mkdir -p ~/manoar_ros_ws/src
-    cd ~/manoar_ros_ws/src
+
+    cd $HOME
+
+    trafalgar_workspace=$HOME/trafalgar_ws
+
+    if [ -d $trafalgar_workspace ] 
+    then
+        ${SUDO} rm -rf trafalgar_workspace
+    fi  
+
+    mkdir -p $HOME/trafalgar_ws/src
+
+    cd $trafalgar_workspace/src
 
     git clone https://github.com/man-o-ar/trafalgar_gsc_v0.git
 
-    cd ~/manoar_ros_ws/
-    rosdep install -i --from-path src --rosdistro $ros_version -y
+    cd $trafalgar_workspace
+
+    source /opt/ros/${ros_version}/setup.bash
+    
+    rosdep update
+    rosdep init
+
+    rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
 
     section
 
 }
 
+
+restart(){
+
+
+    section
+    echo "ending installation, reboot system after update"
+    section
+
+    cd $HOME
+    ${SUDO} apt update
+    ${SUDO} apt upgrade -y
+
+    while true; do
+        read -p "Voulez-vous procéder au redémarrage ? (o/n) " answer
+        case "$answer" in
+            o)
+                ${SUDO} reboot
+                break
+                ;;
+            n)
+                break
+                ;;
+            *)
+            echo "Veuillez répondre par 'o' ou 'n'."
+            ;;
+        esac
+    done
+
+}
 
 
 
@@ -181,6 +226,7 @@ if [[ $EUID -ne 0 ]]; then
   SUDO="sudo -E"
 fi
 
+ros_version="humble" 
 
 while getopts r flag
     do
@@ -189,10 +235,9 @@ while getopts r flag
         esac
     done
 
-echo "ros_version_selected: $ros_version";
 echo "Starting GSC Installation..."
+echo "ros_version: $ros_version";
 
-sudo apt update
 
 install_build_dependencies
 set_python3_as_default
@@ -201,4 +246,4 @@ install_gstreamer
 
 install_ros2
 set_ros_workspace
-
+restart
