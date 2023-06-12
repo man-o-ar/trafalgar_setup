@@ -11,10 +11,10 @@ section(){
 
 set_python3_as_default(){
 
-    cd $HOME/
+    cd
 
     section
-    echo "Starting python 3 config as default"
+    echo "Set python 3 config as default"
     section
 
     ${SUDO} apt install -y python-is-python3
@@ -23,10 +23,10 @@ set_python3_as_default(){
 
 install_pip_dependencies(){
 
-    cd $HOME/
+    cd
 
     section
-    echo "Starting pip installation"
+    echo "install pip and depedencies"
     section
 
     ${SUDO} apt install -y python3-dev python3-numpy python3-pip 
@@ -45,10 +45,11 @@ install_pip_dependencies(){
 install_gstreamer(){
 
     section
-    echo "Starting gstreamer installation"
+    echo "install gstreamer"
     section
+    
 
-    cd $HOME/
+    cd
 
     ${SUDO} apt install -y gstreamer1.0-tools gstreamer1.0-nice gstreamer1.0-alsa gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio libsoup2.4-dev libjson-glib-dev
     ${SUDO} apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev libgstreamer-plugins-bad1.0-dev
@@ -120,14 +121,26 @@ install_build_dependencies(){
 
 install_ros2(){
 
+    section
+    echo "install ros2"
+    section
+
     locale  # check for UTF-8
 
-    ${SUDO} apt update && ${SUDO} apt install locales
-    ${SUDO} locale-gen fr_FR fr_FR.UTF-8
-    ${SUDO} update-locale LC_ALL=fr_FR.UTF-8 LANG=fr_FR.UTF-8
-    export LANG=fr_FR.UTF-8
+    ${SUDO} apt update
 
-    locale  # verify settings
+    if locale -a | grep ^fr_FR 
+    then
+        echo "fr locales already installed"
+    else
+
+        ${SUDO} apt install locales
+        ${SUDO} locale-gen fr_FR fr_FR.UTF-8
+        ${SUDO} update-locale LC_ALL=fr_FR.UTF-8 LANG=fr_FR.UTF-8
+        export LANG=fr_FR.UTF-8
+        locale  # verify settings
+    fi
+
 
     ${SUDO} apt install -y software-properties-common
     ${SUDO} add-apt-repository universe
@@ -166,11 +179,12 @@ install_ros2(){
 set_ros_workspace(){
 
     section
-    echo "Starting DRONE service script installation"
+    echo "install trafalgar ros2 workspace"
     section
     
-    mkdir -p ~/manoar_rov_ws/src
-    cd ~/manoar_rov_ws/src
+    mkdir -p ~/trafalgar_ws/src
+
+    cd ~/trafalgar_ws/src
 
     if [ $device_type == 'operator' ]
     then
@@ -180,8 +194,8 @@ set_ros_workspace(){
         git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
     fi
 
-    cp ~/manoar_rov_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py ~/manoar_rov_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py 
-    cd ~/manoar_rov_ws/
+    cp ~/trafalgar_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py ~/trafalgar_ws/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py 
+    cd ~/trafalgar_ws/
 
     source /opt/ros/${ros_version}/setup.bash
 
@@ -198,18 +212,18 @@ set_ros_workspace(){
 set_ros_service(){
 
     section
-    echo "Starting DRONE service script installation"
+    echo "install trafalgar service script"
     section
     
-    cd $HOME/
+    cd
 
-    ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
+    ${SUDO} cp ~/trafalgar_ws/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
     ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
     if [ $device_type == 'operator' ]
     then
         ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
-        ${SUDO} cp ~/manoar_ros_ws/src/trafalgar_${device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
+        ${SUDO} cp ~/trafalgar_ws/src/trafalgar_${device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
 
         systemctl enable cursorHide.service
         systemctl start cursorHide.service
@@ -224,7 +238,12 @@ set_ros_service(){
 
 
 install_ac1300_driver(){
-    cd $HOME/
+
+    section
+    echo "install ac1300 driver"
+    section
+
+    cd
     git clone https://github.com/morrownr/88x2bu-20210702.git
     cd 88x2bu-20210702/
     sudo ./install-driver.sh
@@ -238,7 +257,7 @@ restart(){
     echo "ending installation, reboot system after update"
     section
 
-    cd $HOME/
+    cd
 
     ${SUDO} apt update
     ${SUDO} apt upgrade -y
@@ -278,7 +297,8 @@ fi
 
 echo "device_index: $device_index";
 
-cd $HOME/
+cd
+
 sudo apt update
 
 install_build_dependencies
