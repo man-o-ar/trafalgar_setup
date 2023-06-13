@@ -31,11 +31,11 @@ install_pip_dependencies(){
 
     ${SUDO} apt install -y python3-dev python3-numpy python3-pip 
 
-    pip3 install pyserial opencv-python
+    sudo -u "$SUDO_USER" pip3 install pyserial opencv-python
 
     if [ $device_type == 'operator' ]
     then
-        pip3 install tk customtkinter Pillow
+        sudo -u "$SUDO_USER" pip3 install tk customtkinter Pillow
         ${SUDO} apt install -y python3-tk
     fi
     
@@ -165,20 +165,14 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-image-tools
     ${SUDO} apt install -y ros-$ros_version-cv-bridge
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
-    
-    echo 'source /opt/ros/$ros_version/setup.bash' >> ~/.bashrc
-        
     ${SUDO} apt install -y ros-$ros_version-rmw-cyclonedds-cpp
-    echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
-    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
 
-    section
 
 }
 
 
 
-set_ros_workspace(){
+set_trafalgar_workspace(){
 
     section
     echo "install trafalgar ros2 workspace"
@@ -186,27 +180,30 @@ set_ros_workspace(){
 
     cd $HOME
 
-    trafalgar_workspace=$HOME/trafalgar_ws
+    trafalgar_workspace="/home/$SUDO_USER/trafalgar_ws"
 
     if [ -d $trafalgar_workspace ] 
     then
-        ${SUDO} rm -rf trafalgar_workspace
+        ${SUDO} rm -rf $trafalgar_workspace
+        echo "previous directory has been removed"
     fi  
 
-    mkdir -p $HOME/trafalgar_ws/src
+    sudo -u "$SUDO_USER" bash -c '
+    mkdir -p "$HOME/trafalgar_ws/src"
+    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
+    echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
+    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
+    '
 
     cd $trafalgar_workspace/src
-
-    if [ $device_type == 'operator' ]
+        
+    if [ $device_type != 'drone' ]
     then
         git clone https://github.com/man-o-ar/trafalgar_operator_v0.git
-        
     else
         git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
     fi
 
-    cd $HOME
-    
     launch_index=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py
     launch_source=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_launch.py 
 
@@ -221,39 +218,43 @@ set_ros_workspace(){
 
     source /opt/ros/${ros_version}/setup.bash
     
-    rosdep update
     rosdep init
+    sudo -u "$SUDO_USER" rosdep update
 
     rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
 
-    section
+    while true; do
+        read -p "Voulez-vous procéder à l'installation du service script ? (o/n) " answer
+        case "$answer" in
+            o)
+                section
+                echo "install trafalgar service script"
+                section
+   
+                ${SUDO} cp $trafalgar_workspace/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
+                ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+                
+                if $device_type != "drone"
+                then
+                    ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
+                    unclutter -idle 0  
+                fi
 
-}
+                ${SUDO} systemctl enable trafalgar.service
+                ${SUDO} systemctl start trafalgar.service
 
-set_ros_service(){
+                break
+                ;;
+            n)
+                break
+                ;;
+            *)
+            echo "Veuillez répondre par 'o' ou 'n'."
+            ;;
+        esac
+    done
 
-    section
-    echo "install trafalgar service script"
-    section
-    
-    cd $HOME
-
-    ${SUDO} cp ${HOME}/trafalgar_ws/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
-    ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-
-    if [ $device_type == 'operator' ]
-    then
-        ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
-        unclutter -idle 0
-        #${SUDO} cp ${HOME}/trafalgar_ws/src/trafalgar_${device_type}_v0/service/unclutter/cursorHide.service /etc/systemd/cursorHide.service
-        #${SUDO} systemctl enable cursorHide.service
-        #${SUDO} systemctl start cursorHide.service 
-    fi
-
-    ${SUDO} systemctl enable trafalgar.service
-    ${SUDO} systemctl start trafalgar.service
-    #systemctl daemon-reload
 
 }
 
@@ -359,7 +360,7 @@ fi
 
 ros_version="humble" 
 device_type="drone"
-device_index="0"
+device_index=0
 
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -368,14 +369,13 @@ if [ "$(id -u)" -ne 0 ]; then
 	exit 1
 fi
 
-while getopts r:d:i flag
-    do
-        case "${flag}" in
-            r) ros_version=${OPTARG};;
-            d) device_type=${OPTARG};;
-            i) device_index=${OPTARG};;
-        esac
-    done
+while getopts 'r:d:i:' OPTIONS; do
+    case $OPTIONS in
+        r) ros_version=$OPTARG ;;
+        d) device_type=$OPTARG ;;
+        i) device_index=$OPTARG ;;
+    esac
+done
 
 
 echo "Starting installation..."
@@ -383,14 +383,14 @@ echo "device: $device_type";
 echo "index: $device_index";
 echo "ros_version: $ros_version";
 
+
 install_build_dependencies
 set_python3_as_default
 install_pip_dependencies
 install_gstreamer
 
 install_ros2
-set_ros_workspace
-set_ros_service
+set_trafalgar_workspace
 
 install_ac1300_driver
 

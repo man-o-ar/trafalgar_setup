@@ -30,7 +30,7 @@ install_pip_dependencies(){
     ${SUDO} apt install -y python3-dev python3-numpy python3-pip 
     ${SUDO} apt install -y python3-tk
     
-    pip3 install pyserial opencv-python tk customtkinter Pillow
+    sudo -u "$SUDO_USER" pip3 install pyserial opencv-python tk customtkinter Pillow
     
 
 }
@@ -143,18 +143,11 @@ install_ros2(){
     ${SUDO} apt install -y ros-$ros_version-vision-opencv
     ${SUDO} apt install -y ros-$ros_version-rmw-cyclonedds-cpp
 
-    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
-    echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
-    
-    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
-
-
-    section
 
 }
 
 
-set_ros_workspace(){
+set_trafalgar_workspace(){
 
     section
     echo "install trafalgar ros2 workspace"
@@ -162,14 +155,21 @@ set_ros_workspace(){
 
     cd $HOME
 
-    trafalgar_workspace=$HOME/trafalgar_ws
+    trafalgar_workspace="/home/$SUDO_USER/trafalgar_ws"
 
     if [ -d $trafalgar_workspace ] 
     then
-        ${SUDO} rm -rf trafalgar_workspace
+        ${SUDO} rm -rf $trafalgar_workspace
+        echo "previous directory has been removed"
     fi  
 
-    mkdir -p $HOME/trafalgar_ws/src
+    sudo -u "$SUDO_USER" bash -c '
+    mkdir -p "$HOME/trafalgar_ws/src"
+    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
+    echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
+    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
+    '
+
 
     cd $trafalgar_workspace/src
 
@@ -179,13 +179,12 @@ set_ros_workspace(){
 
     source /opt/ros/${ros_version}/setup.bash
     
-    rosdep update
     rosdep init
+    sudo -u "$SUDO_USER" rosdep update
 
     rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
 
-    section
 
 }
 
@@ -245,5 +244,5 @@ install_pip_dependencies
 install_gstreamer
 
 install_ros2
-set_ros_workspace
+set_trafalgar_workspace
 restart
