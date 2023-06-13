@@ -59,6 +59,7 @@ install_gstreamer(){
 
 install_build_dependencies(){
 
+    ${SUDO} apt install -y dkms
     ${SUDO} apt install -y build-essential cmake || echo "******* cmake install has failed *******"
     ${SUDO} apt install -y build-essential unzip || echo "******* unzip install has failed *******"
     ${SUDO} apt install -y build-essential pkg-config || echo "******* pkconfig install has failed *******"
@@ -114,7 +115,9 @@ install_build_dependencies(){
     ${SUDO} apt install -y libudev-dev || echo "******* libudev-dev install has failed *******"
     ${SUDO} apt install -y libusb-1.0-0-dev || echo "******* libusb-1.0-0-dev install has failed *******"
 
-    
+    ${SUDO} apt install -y expect
+ 
+
 }
 
 
@@ -267,8 +270,44 @@ install_ac1300_driver(){
             o)
                 echo "La réponse est 'oui'."
                 cd $SUDO
-                git clone https://github.com/morrownr/88x2bu-20210702.git        
+                $SUDO apt install linux-headers-$(uname -r)
+                # check to ensure gcc is installed
+                if ! command -v gcc >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: gcc will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install gcc
+                fi
+
+                if ! command -v bc >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: bc will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install bc
+                fi
+
+                if ! command -v iw >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: iw will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install iw
+                fi
+
+                if ! command -v rfkill >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: rfkill will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install rfkill
+                fi
+        
+                git clone https://github.com/morrownr/88x2bu-20210702.git    
+
                 cd $HOME/88x2bu-20210702
+
                 ${SUDO} ./install-driver.sh
                 break
                 ;;
@@ -321,6 +360,13 @@ fi
 ros_version="humble" 
 device_type="drone"
 device_index="0"
+
+
+if [ "$(id -u)" -ne 0 ]; then
+	echo "You must run this script with superuser (root) privileges."
+	echo "Try: \"sudo ./${SCRIPT_NAME}\""
+	exit 1
+fi
 
 while getopts r:d:i flag
     do
