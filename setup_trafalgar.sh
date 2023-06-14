@@ -171,94 +171,6 @@ install_ros2(){
 }
 
 
-
-set_trafalgar_workspace(){
-
-    section
-    echo "install trafalgar ros2 workspace"
-    section
-
-    cd $HOME
-
-    trafalgar_workspace="/home/$SUDO_USER/trafalgar_ws"
-
-    if [ -d $trafalgar_workspace ] 
-    then
-        ${SUDO} rm -rf $trafalgar_workspace
-        echo "previous directory has been removed"
-    fi  
-
-    sudo -u "$SUDO_USER" bash -c '
-    mkdir -p "$HOME/trafalgar_ws/src"
-    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
-    echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
-    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
-    '
-
-    cd $trafalgar_workspace/src
-        
-    if [ $device_type != 'drone' ]
-    then
-        git clone https://github.com/man-o-ar/trafalgar_operator_v0.git
-    else
-        git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
-    fi
-
-    launch_index=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py
-    launch_source=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_launch.py 
-
-    if cmp -s $launch_index $launch_source
-    then
-        echo "the launch files are identical, pass that step"
-    else
-        cp $launch_index $launch_source
-    fi
-
-    cd $trafalgar_workspace
-
-    source /opt/ros/${ros_version}/setup.bash
-    
-    rosdep init
-    sudo -u "$SUDO_USER" rosdep update
-
-    rosdep install -i --from-path src --rosdistro ${ros_version} -y
-    colcon build --symlink-install
-
-    while true; do
-        read -p "Voulez-vous procéder à l'installation du service script ? (o/n) " answer
-        case "$answer" in
-            o)
-                section
-                echo "install trafalgar service script"
-                section
-   
-                ${SUDO} cp $trafalgar_workspace/src/trafalgar_${device_type}_v0/service/${ros_version}/trafalgar.service /etc/systemd/trafalgar.service
-                ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-                
-                if $device_type != "drone"
-                then
-                    ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
-                    unclutter -idle 0  
-                fi
-
-                ${SUDO} systemctl enable trafalgar.service
-                ${SUDO} systemctl start trafalgar.service
-
-                break
-                ;;
-            n)
-                break
-                ;;
-            *)
-            echo "Veuillez répondre par 'o' ou 'n'."
-            ;;
-        esac
-    done
-
-
-}
-
-
 install_ac1300_driver(){
 
     section
@@ -323,6 +235,150 @@ install_ac1300_driver(){
 
 }
 
+
+trafalgar_workspace(){
+
+    section
+    echo "install trafalgar ros2 workspace"
+    section
+
+    cd $HOME
+
+    trafalgar_workspace="/home/$SUDO_USER/trafalgar_ws"
+
+    if [ -d $trafalgar_workspace ] 
+    then
+        ${SUDO} rm -rf $trafalgar_workspace
+        echo "previous directory has been removed"
+    fi  
+
+    sudo -u "$SUDO_USER" bash -c '
+    mkdir -p "$HOME/trafalgar_ws/src"
+    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
+    echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
+    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
+    echo 'export PEER_ID=$device_index' >> ~/.bashrc
+    '
+
+    cd $trafalgar_workspace/src
+        
+    if [ $device_type != 'drone' ]
+    then
+        git clone https://github.com/man-o-ar/trafalgar_operator_v0.git
+    else
+        git clone https://github.com/man-o-ar/trafalgar_drone_v0.git
+    fi
+
+    #launch_index=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_${device_index}_launch.py
+    #launch_source=$trafalgar_workspace/src/trafalgar_${device_type}_v0/launch/device_launch.py 
+
+    #if cmp -s $launch_index $launch_source
+    #then
+    #    echo "the launch files are identical, pass that step"
+    #else
+    #    cp $launch_index $launch_source
+    #fi
+
+    cd $trafalgar_workspace
+
+    source /opt/ros/${ros_version}/setup.bash
+    
+    rosdep init
+    sudo -u "$SUDO_USER" rosdep update
+
+    rosdep install -i --from-path src --rosdistro ${ros_version} -y
+    colcon build --symlink-install
+
+    ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+    if $device_type != "drone"
+    then
+        ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
+        unclutter -idle 0  
+    fi
+
+
+    while true; do
+        read -p "Voulez-vous procéder à l'installation du service script ? (o/n) " answer
+        case "$answer" in
+            o)
+                trafalgar_service
+                restart
+                break
+                ;;
+            n)
+                restart
+                break
+                ;;
+            *)
+            echo "Veuillez répondre par 'o' ou 'n'."
+            ;;
+        esac
+    done
+
+}
+
+
+trafalgar_service(){
+
+    section
+    echo "install trafalgar service script"
+    section
+
+    trafalgar_workspace="/home/$SUDO_USER/trafalgar_ws"
+
+    trafalgar_service_dir="$trafalgar_workspace/services"
+
+    if [ -d $trafalgar_service_dir ] 
+    then
+        ${SUDO} rm -rf $trafalgar_service_dir
+        echo "previous directory has been removed"
+    fi  
+
+    cd $trafalgar_workspace
+    sudo -u "$SUDO_USER" bash -c 'mkdir "services"'
+
+    service_file=$trafalgar_service_dir/trafalgar.service
+
+    # check file existence
+    if [[ -f $service_file ]]; then
+        rm $service_file
+        touch $service_file
+    fi
+
+    trafalgar_application="rov_app"
+
+    if $device_type != "drone"
+    then
+        trafalgar_application="naviscope"
+    fi
+
+    # Contenu du fichier de service
+    service_content="[Unit]
+    \nDescription=\"trafalgar $device_type app\"
+    \nAfter=network.target
+    \n\n[Service]
+    \nType=simple
+    \nUser=$SUDO_USER
+    \nWorkingDirectory=$trafalgar_workspace
+    \nExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch $trafalgar_application device_launch.py\"
+    \nRestart=on-failure
+    \nRestartSec=5s
+    \n\n[Install]
+    \nWantedBy=multi-user.target"
+
+    # Écriture du contenu dans le fichier de service
+    echo -e $service_content > $service_file
+    ${SUDO} cp $service_file /etc/systemd/trafalgar.service
+
+    ${SUDO} systemctl enable trafalgar.service
+    ${SUDO} systemctl start trafalgar.service
+
+}
+
+
+
+
 restart(){
 
 
@@ -358,6 +414,7 @@ if [[ $EUID -ne 0 ]]; then
   SUDO="sudo -E"
 fi
 
+
 ros_version="humble" 
 device_type="drone"
 device_index=0
@@ -369,7 +426,7 @@ if [ "$(id -u)" -ne 0 ]; then
 	exit 1
 fi
 
-while getopts 'r:d:i:' OPTIONS; do
+while getopts 'b:r:d:i:' OPTIONS; do
     case $OPTIONS in
         r) ros_version=$OPTARG ;;
         d) device_type=$OPTARG ;;
@@ -383,15 +440,18 @@ echo "device: $device_type";
 echo "index: $device_index";
 echo "ros_version: $ros_version";
 
+if 
 
 install_build_dependencies
 set_python3_as_default
 install_pip_dependencies
 install_gstreamer
 
-install_ros2
-set_trafalgar_workspace
-
 install_ac1300_driver
+install_ros2
 
-restart
+trafalgar_workspace
+
+
+
+
