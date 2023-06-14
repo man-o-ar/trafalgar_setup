@@ -440,8 +440,6 @@ echo "device: $device_type";
 echo "index: $device_index";
 echo "ros_version: $ros_version";
 
-if 
-
 install_build_dependencies
 set_python3_as_default
 install_pip_dependencies
