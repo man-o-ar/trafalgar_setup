@@ -252,13 +252,13 @@ trafalgar_workspace(){
         echo "previous directory has been removed"
     fi  
 
-    sudo -u "$SUDO_USER" bash -c '
-    mkdir -p "$HOME/trafalgar_ws/src"
-    echo "source /opt/ros/$ros_version/setup.bash" >> ~/.bashrc
+    sudo -u "$SUDO_USER" bash -c "
+    mkdir -p \$HOME/trafalgar_ws/src
+    echo 'source /opt/ros/$ros_version/setup.bash' >> ~/.bashrc
     echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
-    echo "net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n" | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
+    echo 'net.core.rmem_max=8388608\nnet.core.rmem_default=8388608\n' | ${SUDO} tee /etc/sysctl.d/60-cyclonedds.conf
     echo 'export PEER_ID=$device_index' >> ~/.bashrc
-    '
+    "
 
     cd $trafalgar_workspace/src
         
@@ -283,8 +283,15 @@ trafalgar_workspace(){
 
     source /opt/ros/${ros_version}/setup.bash
     
-    rosdep init
-    sudo -u "$SUDO_USER" rosdep update
+    sources_list="/etc/ros/rosdep/sources.list.d/20-default.list"
+
+    if [ -f "$sources_list" ]; then
+        echo "Le fichier $sources_list existe déjà."
+    else
+        # Exécuter la commande rosdep init si le fichier n'existe pas
+        rosdep init
+        sudo -u "$SUDO_USER" rosdep update
+    fi
 
     rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
@@ -297,7 +304,9 @@ trafalgar_workspace(){
         unclutter -idle 0  
     fi
 
-
+    sudo chown -R $SUDO_USER $trafalgar_workspace
+    sudo chmod 775 -R $trafalgar_workspace
+    
     while true; do
         read -p "Voulez-vous procéder à l'installation du service script ? (o/n) " answer
         case "$answer" in
@@ -382,18 +391,18 @@ trafalgar_service(){
 restart(){
 
 
-    section
-    echo "ending installation, reboot system after update"
-    section
-
-    cd $HOME
-    ${SUDO} apt update
-    ${SUDO} apt upgrade -y
-
     while true; do
         read -p "Voulez-vous procéder au redémarrage ? (o/n) " answer
         case "$answer" in
             o)
+                section
+                echo "ending installation, reboot system after update"
+                section
+
+                cd $HOME
+                ${SUDO} apt update
+                ${SUDO} apt upgrade -y
+
                 ${SUDO} reboot
                 break
                 ;;
