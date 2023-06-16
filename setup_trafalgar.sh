@@ -222,13 +222,12 @@ trafalgar_workspace(){
     sources_list="/etc/ros/rosdep/sources.list.d/20-default.list"
 
     if [ -f "$sources_list" ]; then
-        echo "Le fichier $sources_list existe déjà."
+        echo "rosdep init already ran"
     else
-        # Exécuter la commande rosdep init si le fichier n'existe pas
         rosdep init
-        sudo -u "$SUDO_USER" rosdep update
     fi
 
+    sudo -u "$SUDO_USER" rosdep update
     rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
 
