@@ -225,18 +225,25 @@ if [[ $EUID -ne 0 ]]; then
   SUDO="sudo -E"
 fi
 
-ros_version="humble" 
+linux_release=$(lsb_release -rs)
+    case $linux_release in
+    "20.04")
+        ros_version="foxy"
+        ;;
+    "22.04")
+        ros_version="humble"
+        ;;
+    "23.04")
+        ros_version="iron"
+        ;;
+    *)
+        echo "la distribution de linux n'est pas identifiée, le système est mal configuré ou est trop ancien"
+        exit 0
+        ;;
+    esac
 
-while getopts r flag
-    do
-        case "${flag}" in
-            r) ros_version=${OPTARG};;
-        esac
-    done
 
 echo "Starting GSC Installation..."
-echo "ros_version: $ros_version";
-
 
 install_build_dependencies
 set_python3_as_default

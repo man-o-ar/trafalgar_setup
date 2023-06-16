@@ -427,13 +427,13 @@ install_config(){
 
     case $linux_release in
     "20.04")
-        ros_distro="humble"
+        ros_version="foxy"
         ;;
     "22.04")
-        ros_distro="humble"
+        ros_version="humble"
         ;;
     "23.04")
-        ros_distro="iron"
+        ros_version="iron"
         ;;
     *)
         echo "la distribution de linux n'est pas identifiée, le système est mal configuré ou est trop ancien"
@@ -473,7 +473,7 @@ install_config(){
     read -p "entrez le mot de passe pour ce réseau : " network_password
 
     section
-    echo "la distribution: $ros_distro de ros2  sera installée"
+    echo "la distribution: $ros_version de ros2  sera installée"
     echo "pour l'appareil $device_type n°$device_index"
     echo "sur le réseau wifi: $network_name avec le mot passe : $network_password"
     section
