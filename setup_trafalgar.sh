@@ -312,7 +312,7 @@ trafalgar_service(){
 
     # Écriture du contenu dans le fichier de service
     echo -e $service_content > $service_file
-    ${SUDO} cp $service_file /etc/systemd/trafalgar.service
+    ${SUDO} cp $service_file /etc/systemd/system/trafalgar.service
 
     ${SUDO} systemctl enable trafalgar.service
     ${SUDO} systemctl start trafalgar.service
