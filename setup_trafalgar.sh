@@ -171,70 +171,6 @@ install_ros2(){
 }
 
 
-install_ac1300_driver(){
-
-    section
-    echo "install ac1300 driver"
-    section
-
-    while true; do
-        read -p "Voulez-vous procéder à l'installation du driver ? (o/n) " answer
-        case "$answer" in
-            o)
-                echo "La réponse est 'oui'."
-                cd $SUDO
-                $SUDO apt install linux-headers-$(uname -r)
-                # check to ensure gcc is installed
-                if ! command -v gcc >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: gcc will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install gcc
-                fi
-
-                if ! command -v bc >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: bc will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install bc
-                fi
-
-                if ! command -v iw >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: iw will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install iw
-                fi
-
-                if ! command -v rfkill >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: rfkill will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install rfkill
-                fi
-        
-                git clone https://github.com/morrownr/88x2bu-20210702.git    
-
-                cd $HOME/88x2bu-20210702
-
-                ${SUDO} ./install-driver.sh
-                break
-                ;;
-            n)
-                break
-                ;;
-            *)
-            echo "Veuillez répondre par 'o' ou 'n'."
-            ;;
-        esac
-    done
-
-}
-
 
 trafalgar_workspace(){
 
@@ -312,11 +248,9 @@ trafalgar_workspace(){
         case "$answer" in
             o)
                 trafalgar_service
-                restart
                 break
                 ;;
             n)
-                restart
                 break
                 ;;
             *)
@@ -386,6 +320,76 @@ trafalgar_service(){
 }
 
 
+prepare_lwan(){
+
+    section 
+    echo "connect to "
+    section
+
+    nmcli connection add type wifi ifname wlan0 con-name trafalgar ssid $network_ssid password $network_password
+
+    section
+    echo "install ac1300 driver"
+    section
+
+    while true; do
+        read -p "Voulez-vous procéder à l'installation du driver wifi ? (o/n) " answer
+        case "$answer" in
+            o)
+                echo "La réponse est 'oui'."
+                cd $SUDO
+                $SUDO apt install linux-headers-$(uname -r)
+                # check to ensure gcc is installed
+                if ! command -v gcc >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: gcc will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install gcc
+                fi
+
+                if ! command -v bc >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: bc will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install bc
+                fi
+
+                if ! command -v iw >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: iw will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install iw
+                fi
+
+                if ! command -v rfkill >/dev/null 2>&1
+                then
+	                echo "A required package is not installed."
+	                echo "the following package: rfkill will be installed"
+	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
+	                ${SUDO} apt install rfkill
+                fi
+        
+                git clone https://github.com/morrownr/88x2bu-20210702.git    
+
+                cd $HOME/88x2bu-20210702
+
+                ${SUDO} ./install-driver.sh
+                break
+                ;;
+            n)
+                break
+                ;;
+            *)
+            echo "Veuillez répondre par 'o' ou 'n'."
+            ;;
+        esac
+    done
+
+}
+
 
 
 restart(){
@@ -418,16 +422,87 @@ restart(){
 }
 
 
+
+install_config(){
+
+    case $linux_release in
+    "20.04")
+        ros_distro="humble"
+        ;;
+    "22.04")
+        ros_distro="humble"
+        ;;
+    "23.04")
+        ros_distro="iron"
+        ;;
+    *)
+        echo "la distribution de linux n'est pas identifiée, le système est mal configuré ou est trop ancien"
+        exit 0
+        ;;
+    esac
+
+
+    while true; do
+        read -p "installer le programme de contrôle du drone (d) ou du naviscope (n) ? " device_answer
+        case $device_answer in
+        d)
+            device_type="drone"
+            break
+            ;;
+        n)
+            device_type="operator"
+            break
+            ;;
+        *)
+            echo "Veuillez répondre par 'd' (drone) ou 'n' (naviscope)."
+            ;;
+        esac
+    done
+
+
+    read -p "entrez l'index du $device_type : " user_index
+
+    if ! [[ $user_index =~ ^[0-9]+$ ]]
+    then 
+    device_index=0
+    else
+    device_index=$user_index
+    fi
+
+    read -p "entrez le nom du réseau WIFI utilisé par ROS : " network_ssid
+    read -p "entrez le mot de passe pour ce réseau : " network_password
+
+    section
+    echo "la distribution: $ros_distro de ros2  sera installée"
+    echo "pour l'appareil $device_type n°$device_index"
+    echo "sur le réseau wifi: $network_name avec le mot passe : $network_password"
+    section
+
+    while true; do
+        read -p "les informations enregistrées sont-elles correctes ? " install_resume
+        case $install_resume in
+        o)  
+            break
+            ;;
+        n)
+            echo "recommençons le paramétrage"
+            install_config
+            break
+            ;;
+        *)
+            echo "Veuillez répondre par 'o' (oui) ou 'n' (non)."
+            ;;
+        esac
+    done
+
+}
+
+
+
 SUDO=""
 if [[ $EUID -ne 0 ]]; then
   SUDO="sudo -E"
 fi
-
-
-ros_version="humble" 
-device_type="drone"
-device_index=0
-
 
 if [ "$(id -u)" -ne 0 ]; then
 	echo "You must run this script with superuser (root) privileges."
@@ -435,30 +510,31 @@ if [ "$(id -u)" -ne 0 ]; then
 	exit 1
 fi
 
-while getopts 'b:r:d:i:' OPTIONS; do
-    case $OPTIONS in
-        r) ros_version=$OPTARG ;;
-        d) device_type=$OPTARG ;;
-        i) device_index=$OPTARG ;;
-    esac
-done
+linux_release=$(lsb_release -rs)
+ros_version="humble" 
+device_type="drone"
+device_index=0
+network_ssid=""
+network_password=""
 
+#while getopts i:u:' OPTIONS; do
+#    case $OPTIONS in
+#        i) installation_full=$OPTARG ;;
+#        u) installation_update=$OPTARG ;;
+#    esac
+#done
 
-echo "Starting installation..."
-echo "device: $device_type";
-echo "index: $device_index";
-echo "ros_version: $ros_version";
+install_config
 
 install_build_dependencies
 set_python3_as_default
 install_pip_dependencies
 install_gstreamer
 
-install_ac1300_driver
+
 install_ros2
-
 trafalgar_workspace
-
-
+prepare_lwan
+restart
 
 
