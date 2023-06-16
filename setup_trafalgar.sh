@@ -228,7 +228,8 @@ trafalgar_workspace(){
     fi
 
     sudo -u "$SUDO_USER" rosdep update
-    rosdep install -i --from-path src --rosdistro ${ros_version} -y
+
+    sudo -u "$SUDO_USER" rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
 
     ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
