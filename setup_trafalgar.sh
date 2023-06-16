@@ -234,7 +234,7 @@ trafalgar_workspace(){
 
     ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
-    if $device_type != "drone"
+    if [[ $device_type != "drone" ]]
     then
         ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
         unclutter -idle 0  
@@ -279,7 +279,11 @@ trafalgar_service(){
     fi  
 
     cd $trafalgar_workspace
+
     sudo -u "$SUDO_USER" bash -c 'mkdir "services"'
+
+    sudo chown -R $SUDO_USER $trafalgar_service_dir
+    sudo chmod 775 -R $trafalgar_service_dir
 
     service_file=$trafalgar_service_dir/trafalgar.service
 
@@ -291,24 +295,29 @@ trafalgar_service(){
 
     trafalgar_application="rov_app"
 
-    if $device_type != "drone"
+    if [[ $device_type != "drone" ]]
     then
         trafalgar_application="naviscope"
     fi
+    
+    {
+    echo "[Unit]"
+    echo "Description=\"trafalgar $device_type app\""
+    echo "After=network.target"
+    echo ""
+    echo "[Service]"
+    echo "Type=simple"
+    echo "User=$SUDO_USER"
+    echo "Environment=\"PEER_ID=$device_index\""
+    echo "WorkingDirectory=$trafalgar_workspace"
+    echo "ExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch $trafalgar_application device_launch.py\""
+    echo "Restart=on-failure"
+    echo "RestartSec=30s"
+    echo ""
+    echo "[Install]"
+    echo "WantedBy=multi-user.target"
+    }   > $service_file
 
-    # Contenu du fichier de service
-    service_content="[Unit]
-    \nDescription=\"trafalgar $device_type app\"
-    \nAfter=network.target
-    \n\n[Service]
-    \nType=simple
-    \nUser=$SUDO_USER
-    \nWorkingDirectory=$trafalgar_workspace
-    \nExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch $trafalgar_application device_launch.py\"
-    \nRestart=on-failure
-    \nRestartSec=5s
-    \n\n[Install]
-    \nWantedBy=multi-user.target"
 
     # Écriture du contenu dans le fichier de service
     echo -e $service_content > $service_file
