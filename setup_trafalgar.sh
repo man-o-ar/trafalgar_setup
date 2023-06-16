@@ -530,11 +530,11 @@ install_build_dependencies
 set_python3_as_default
 install_pip_dependencies
 install_gstreamer
-
+prepare_lwan
 
 install_ros2
 trafalgar_workspace
-prepare_lwan
+
 restart
 
 
