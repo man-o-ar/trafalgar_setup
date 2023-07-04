@@ -35,7 +35,7 @@ install_pip_dependencies(){
 
     if [ $device_type == 'operator' ]
     then
-        sudo -u "$SUDO_USER" pip3 install tk customtkinter Pillow
+        sudo -u "$SUDO_USER" pip3 install tk customtkinter Pillow pygame
         ${SUDO} apt install -y python3-tk
     fi
     
