@@ -335,7 +335,7 @@ prepare_lwan(){
     echo "connect to "
     section
 
-    nmcli connection add type wifi ifname wlan0 con-name trafalgar ssid $network_ssid password $network_password
+    #nmcli connection add type wifi ifname wlan0 con-name trafalgar ssid $network_ssid password $network_password
 
     section
     echo "install ac1300 driver"
