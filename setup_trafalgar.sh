@@ -59,6 +59,8 @@ install_gstreamer(){
 
 install_build_dependencies(){
 
+    $SUDO apt install -y linux-headers-$(uname -r)
+
     ${SUDO} apt install -y dkms
     ${SUDO} apt install -y build-essential cmake || echo "******* cmake install has failed *******"
     ${SUDO} apt install -y build-essential unzip || echo "******* unzip install has failed *******"
@@ -347,7 +349,7 @@ prepare_lwan(){
             o)
                 echo "La réponse est 'oui'."
                 cd $SUDO
-                $SUDO apt install linux-headers-$(uname -r)
+
                 # check to ensure gcc is installed
                 if ! command -v gcc >/dev/null 2>&1
                 then
