@@ -316,11 +316,11 @@ trafalgar_service(){
     echo ""
     echo "[Install]"
     echo "WantedBy=multi-user.target"
-    }   > $service_file
+    } > $service_file
 
 
     # Écriture du contenu dans le fichier de service
-    echo -e $service_content > $service_file
+    #echo -e $service_content > $service_file
     ${SUDO} cp $service_file /etc/systemd/system/trafalgar.service
 
     ${SUDO} systemctl enable trafalgar.service
