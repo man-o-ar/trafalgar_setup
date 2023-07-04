@@ -354,7 +354,7 @@ prepare_lwan(){
 	                echo "A required package is not installed."
 	                echo "the following package: gcc will be installed"
 	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install gcc
+	                ${SUDO} apt install -y gcc
                 fi
 
                 if ! command -v bc >/dev/null 2>&1
@@ -362,7 +362,7 @@ prepare_lwan(){
 	                echo "A required package is not installed."
 	                echo "the following package: bc will be installed"
 	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install bc
+	                ${SUDO} apt install -y bc
                 fi
 
                 if ! command -v iw >/dev/null 2>&1
@@ -370,7 +370,7 @@ prepare_lwan(){
 	                echo "A required package is not installed."
 	                echo "the following package: iw will be installed"
 	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install iw
+	                ${SUDO} apt install -y iw
                 fi
 
                 if ! command -v rfkill >/dev/null 2>&1
@@ -378,7 +378,7 @@ prepare_lwan(){
 	                echo "A required package is not installed."
 	                echo "the following package: rfkill will be installed"
 	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install rfkill
+	                ${SUDO} apt install -y rfkill
                 fi
         
                 git clone https://github.com/morrownr/88x2bu-20210702.git    
