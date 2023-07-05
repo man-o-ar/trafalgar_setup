@@ -198,6 +198,8 @@ trafalgar_workspace(){
     echo 'export PEER_ID=$device_index' >> ~/.bashrc
     "
 
+    source ~/.bashrc
+
     cd $trafalgar_workspace/src
         
     if [ $device_type != 'drone' ]
