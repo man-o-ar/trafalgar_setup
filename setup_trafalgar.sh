@@ -32,7 +32,8 @@ install_pip_dependencies(){
     ${SUDO} apt install -y python3-dev python3-numpy python3-pip 
 
     sudo -u "$SUDO_USER" pip3 install pyserial opencv-python
-
+    sudo usermod -a -G dialout $USER
+    
     if [ $device_type == 'operator' ]
     then
         sudo -u "$SUDO_USER" pip3 install tk customtkinter Pillow pygame
