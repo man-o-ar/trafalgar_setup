@@ -483,13 +483,14 @@ install_config(){
     device_index=$user_index
     fi
 
-    read -p "entrez le nom du réseau WIFI utilisé par ROS : " network_ssid
-    read -p "entrez le mot de passe pour ce réseau : " network_password
+    #read -p "entrez le nom du réseau WIFI utilisé par ROS : " network_ssid
+    #read -p "entrez le mot de passe pour ce réseau : " network_password
 
     section
     echo "la distribution: $ros_version de ros2  sera installée"
     echo "pour l'appareil $device_type n°$device_index"
-    echo "sur le réseau wifi: $network_ssid avec le mot passe : $network_password"
+    #echo "sur le réseau wifi: $network_ssid avec le mot passe : $network_password"
+    
     section
 
     while true; do
