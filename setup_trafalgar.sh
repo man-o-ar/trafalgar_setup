@@ -60,7 +60,7 @@ install_gstreamer(){
 
 install_build_dependencies(){
 
-    $SUDO apt install -y linux-headers-$(uname -r)
+    #$SUDO apt install -y linux-headers-$(uname -r)
 
     ${SUDO} apt install -y dkms
     ${SUDO} apt install -y build-essential cmake || echo "******* cmake install has failed *******"
