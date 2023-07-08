@@ -243,6 +243,7 @@ trafalgar_workspace(){
     then
         ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
         unclutter -idle 0  
+        echo 30000 | sudo tee /sys/devices/virtual/thermal/thermal_zone{0,1,2,3}/trip_point_0_temp
     fi
 
     sudo chown -R $SUDO_USER $trafalgar_workspace
@@ -263,6 +264,31 @@ trafalgar_workspace(){
             ;;
         esac
     done
+
+}
+
+
+
+set_n2l_fan_trip_point(){
+
+    TRIP_POINT_0=30000
+    TRIP_POINT_1=50000
+    TRIP_POINT_2=70000
+ 
+    echo $TRIP_POINT_0 > /sys/devices/virtual/thermal/thermal_zone0/trip_point_0_temp
+    echo $TRIP_POINT_0 > /sys/devices/virtual/thermal/thermal_zone1/trip_point_0_temp
+    echo $TRIP_POINT_0 > /sys/devices/virtual/thermal/thermal_zone2/trip_point_0_temp
+    echo $TRIP_POINT_0 > /sys/devices/virtual/thermal/thermal_zone3/trip_point_0_temp
+ 
+    echo $TRIP_POINT_1 > /sys/devices/virtual/thermal/thermal_zone0/trip_point_1_temp
+    echo $TRIP_POINT_1 > /sys/devices/virtual/thermal/thermal_zone1/trip_point_1_temp
+    echo $TRIP_POINT_1 > /sys/devices/virtual/thermal/thermal_zone2/trip_point_1_temp
+    echo $TRIP_POINT_1 > /sys/devices/virtual/thermal/thermal_zone3/trip_point_1_temp
+ 
+    echo $TRIP_POINT_2 > /sys/devices/virtual/thermal/thermal_zone0/trip_point_2_temp
+    echo $TRIP_POINT_2 > /sys/devices/virtual/thermal/thermal_zone1/trip_point_2_temp
+    echo $TRIP_POINT_2 > /sys/devices/virtual/thermal/thermal_zone2/trip_point_2_temp
+    echo $TRIP_POINT_2 > /sys/devices/virtual/thermal/thermal_zone3/trip_point_2_temp
 
 }
 
