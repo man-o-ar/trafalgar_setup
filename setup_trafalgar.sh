@@ -328,28 +328,49 @@ trafalgar_service(){
 
     if [[ $device_type != "drone" ]]
     then
-        trafalgar_application="naviscope"
+       {
+        echo "[Unit]"
+        echo "Description=\"trafalgar $device_type app\""
+        echo "After=graphical.target"
+        echo ""
+        echo "[Service]"
+        echo "Type=simple"
+        echo "User=$SUDO_USER"
+        echo "Environment=\"PEER_ID=$device_index\""
+        echo "Environment=DISPLAY=0.0"
+        echo "WorkingDirectory=$trafalgar_workspace"
+        echo "ExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch naviscope device_launch.py\""
+        echo "Restart=on-failure"
+        echo "RestartSec=30s"
+        echo ""
+        echo "[Install]"
+        echo "WantedBy=graphical.target"
+        } > $service_file
+
+    else 
+       {
+        echo "[Unit]"
+        echo "Description=\"trafalgar $device_type app\""
+        echo "After=network.target"
+        echo ""
+        echo "[Service]"
+        echo "Type=simple"
+        echo "User=$SUDO_USER"
+        echo "Environment=\"PEER_ID=$device_index\""
+        echo "WorkingDirectory=$trafalgar_workspace"
+        echo "ExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch rov_app device_launch.py\""
+        echo "Restart=on-failure"
+        echo "RestartSec=30s"
+        echo ""
+        echo "[Install]"
+        echo "WantedBy=multi-user.target"
+        } > $service_file
+
+        
+
+
     fi
     
-    {
-    echo "[Unit]"
-    echo "Description=\"trafalgar $device_type app\""
-    echo "After=network.target"
-    echo ""
-    echo "[Service]"
-    echo "Type=simple"
-    echo "User=$SUDO_USER"
-    echo "Environment=\"PEER_ID=$device_index\""
-    echo "WorkingDirectory=$trafalgar_workspace"
-    echo "ExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch $trafalgar_application device_launch.py\""
-    echo "Restart=on-failure"
-    echo "RestartSec=30s"
-    echo ""
-    echo "[Install]"
-    echo "WantedBy=multi-user.target"
-    } > $service_file
-
-
     # Écriture du contenu dans le fichier de service
     #echo -e $service_content > $service_file
     ${SUDO} cp $service_file /etc/systemd/system/trafalgar.service
