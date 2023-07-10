@@ -237,14 +237,14 @@ trafalgar_workspace(){
     sudo -u "$SUDO_USER" rosdep install -i --from-path src --rosdistro ${ros_version} -y
     colcon build --symlink-install
 
-    ${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+    #${SUDO} systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
-    if [[ $device_type != 'drone' ]]
-    then
-        ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
-        unclutter -idle 0  
+    #if [[ $device_type != 'drone' ]]
+    #then
+    #    ${SUDO} apt install -y unclutter || echo "******* unclutter install has failed *******"
+    #    unclutter -idle 0  
         #echo 30000 | sudo tee /sys/devices/virtual/thermal/thermal_zone{0,1,2,3}/trip_point_0_temp
-    fi
+    #fi
 
     sudo chown -R $SUDO_USER $trafalgar_workspace
     sudo chmod 775 -R $trafalgar_workspace
