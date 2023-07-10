@@ -337,7 +337,7 @@ trafalgar_service(){
         echo "Type=simple"
         echo "User=$SUDO_USER"
         echo "Environment=\"PEER_ID=$device_index\""
-        echo "Environment=DISPLAY=0.0"
+        echo "Environment=DISPLAY=:0.0"
         echo "WorkingDirectory=$trafalgar_workspace"
         echo "ExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch naviscope device_launch.py\""
         echo "Restart=on-failure"
