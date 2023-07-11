@@ -328,24 +328,57 @@ trafalgar_service(){
 
     if [[ $device_type != "drone" ]]
     then
+       #user service file
        {
         echo "[Unit]"
-        echo "Description=\"trafalgar $device_type app\""
-        echo "After=graphical.target"
+        echo "Description=\"trafalgar naviscope app\""
+        echo "Wants=system-user-sessions.service sound.target network.target lightdm.service display-manager.service pulseaudio.service"
+        echo "After=systemd-user-sessions.service sound.target network.target lightdm.service display-manager.service pulseaudio.service"
         echo ""
         echo "[Service]"
         echo "Type=simple"
         echo "User=$SUDO_USER"
         echo "Environment=\"PEER_ID=$device_index\""
         echo "Environment=DISPLAY=:0.0"
+        echo "Environment=\"XAUTHORITY=/home/odroid/.Xauthority\""
         echo "WorkingDirectory=$trafalgar_workspace"
         echo "ExecStart=/bin/bash -c \"source /opt/ros/$ros_version/setup.bash && source install/local_setup.bash && ros2 launch naviscope device_launch.py\""
         echo "Restart=on-failure"
         echo "RestartSec=30s"
         echo ""
         echo "[Install]"
-        echo "WantedBy=graphical.target"
+        echo "WantedBy=default.target"
         } > $service_file
+
+        # Écriture du contenu dans le fichier de service
+        #echo -e $service_content > $service_file
+        ${SUDO} cp $service_file /etc/systemd/user/trafalgar.service
+
+        ${SUDO} systemctl --user enable trafalgar.service
+        ${SUDO} systemctl --user start trafalgar.service
+
+
+        #autostart file 
+        desktop_file=$trafalgar_service_dir/trafalgar.desktop
+
+        {
+        echo "[Desktop Entry]"
+        echo "Type=Application"
+        echo "Exec=systemctl --user start trafalgar.service"
+        echo "Hidden=false"
+        echo "NoDisplay=false"
+        echo "Name[C]=Naviscope"
+        echo "Name=Naviscope"
+        echo "Comment[C]=naviscope ros node"
+        echo "Comment=naviscope ros node"
+        echo "X-MATE-Autostart-Delay=0"
+        } > $desktop_file
+
+        ${SUDO} cp $service_file /.config/autostart/trafalgar.desktop
+
+        ${SUDO} systemctl --user enable trafalgar.service
+        ${SUDO} systemctl --user start trafalgar.service
+
 
     else 
        {
@@ -367,16 +400,16 @@ trafalgar_service(){
         } > $service_file
 
         
+        # Écriture du contenu dans le fichier de service
+        #echo -e $service_content > $service_file
+        ${SUDO} cp $service_file /etc/systemd/system/trafalgar.service
 
+        ${SUDO} systemctl enable trafalgar.service
+        ${SUDO} systemctl start trafalgar.service
 
     fi
     
-    # Écriture du contenu dans le fichier de service
-    #echo -e $service_content > $service_file
-    ${SUDO} cp $service_file /etc/systemd/system/trafalgar.service
 
-    ${SUDO} systemctl enable trafalgar.service
-    ${SUDO} systemctl start trafalgar.service
 
 }
 
