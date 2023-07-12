@@ -376,9 +376,6 @@ trafalgar_service(){
 
         ${SUDO} cp $service_file /.config/autostart/trafalgar.desktop
 
-        ${SUDO} systemctl --user enable trafalgar.service
-        ${SUDO} systemctl --user start trafalgar.service
-
 
     else 
        {
