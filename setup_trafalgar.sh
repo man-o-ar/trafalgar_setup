@@ -378,7 +378,7 @@ trafalgar_service(){
         echo "X-MATE-Autostart-Delay=0"
         } > $desktop_file
 
-        ${SUDO} cp $desktop_file /home/$SUDO_USER/.config/autostart/trafalgar.desktop
+        #${SUDO} cp $desktop_file /home/$SUDO_USER/.config/autostart/trafalgar.desktop
 
     else 
        {
