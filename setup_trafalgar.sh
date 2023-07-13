@@ -355,8 +355,8 @@ trafalgar_service(){
         #echo -e $service_content > $service_file
         ${SUDO} cp $service_file /etc/systemd/user/trafalgar.service
 
-        sudo loginctl enable-linger "$SUDO_USER" 
-        sudo -u "$SUDO_USER" systemctl --user enable trafalgar.service
+        loginctl enable-linger $SUDO_USER 
+        #systemctl --user enable trafalgar.service
 
         #autostart file 
         desktop_file=$trafalgar_service_dir/trafalgar.desktop
