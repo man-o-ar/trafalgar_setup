@@ -309,11 +309,9 @@ trafalgar_service(){
         echo "previous directory has been removed"
     fi  
 
-    mkdir -p "$trafalgar_service_dir"
+    mkdir -p $trafalgar_service_dir
     
     cd $trafalgar_workspace
-
-    sudo -u "$SUDO_USER" bash -c 'mkdir "services"'
 
     sudo chown -R $SUDO_USER $trafalgar_service_dir
     sudo chmod 775 -R $trafalgar_service_dir
@@ -355,9 +353,9 @@ trafalgar_service(){
 
         # Écriture du contenu dans le fichier de service
         #echo -e $service_content > $service_file
-        sudo -u $SUDO_USER cp $service_file /etc/systemd/user/trafalgar.service
+        ${SUDO} cp $service_file /etc/systemd/user/trafalgar.service
 
-        sudo -u $SUDO_USER systemctl --user enable trafalgar.service
+         ${SUDO} -u $SUDO_USER systemctl --user enable trafalgar.service
 
         #autostart file 
         desktop_file=$trafalgar_service_dir/trafalgar.desktop
@@ -380,8 +378,7 @@ trafalgar_service(){
         echo "X-MATE-Autostart-Delay=0"
         } > $desktop_file
 
-        sudo -u $SUDO_USER cp $desktop_file /.config/autostart/trafalgar.desktop
-
+        ${SUDO} cp $desktop_file /.config/autostart/trafalgar.desktop
 
     else 
        {
@@ -413,77 +410,6 @@ trafalgar_service(){
     fi
     
 
-
-}
-
-
-prepare_lwan(){
-
-    section 
-    echo "connect to "
-    section
-
-    #nmcli connection add type wifi ifname wlan0 con-name trafalgar ssid $network_ssid password $network_password
-
-    section
-    echo "install ac1300 driver"
-    section
-
-    while true; do
-        read -p "Voulez-vous procéder à l'installation du driver wifi ? (o/n) " answer
-        case "$answer" in
-            o)
-                echo "La réponse est 'oui'."
-                cd $SUDO
-
-                # check to ensure gcc is installed
-                if ! command -v gcc >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: gcc will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install -y gcc
-                fi
-
-                if ! command -v bc >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: bc will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install -y bc
-                fi
-
-                if ! command -v iw >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: iw will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install -y iw
-                fi
-
-                if ! command -v rfkill >/dev/null 2>&1
-                then
-	                echo "A required package is not installed."
-	                echo "the following package: rfkill will be installed"
-	                #echo "Once the package is installed, please run \"sudo ./${SCRIPT_NAME}\""
-	                ${SUDO} apt install -y rfkill
-                fi
-        
-                git clone https://github.com/morrownr/88x2bu-20210702.git    
-
-                cd $HOME/88x2bu-20210702
-
-                ${SUDO} ./install-driver.sh
-                break
-                ;;
-            n)
-                break
-                ;;
-            *)
-            echo "Veuillez répondre par 'o' ou 'n'."
-            ;;
-        esac
-    done
 
 }
 
@@ -566,14 +492,10 @@ install_config(){
     device_index=$user_index
     fi
 
-    #read -p "entrez le nom du réseau WIFI utilisé par ROS : " network_ssid
-    #read -p "entrez le mot de passe pour ce réseau : " network_password
-
     section
     echo "la distribution: $ros_version de ros2  sera installée"
     echo "pour l'appareil $device_type n°$device_index"
-    #echo "sur le réseau wifi: $network_ssid avec le mot passe : $network_password"
-    
+ 
     section
 
     while true; do
@@ -612,8 +534,7 @@ linux_release=$(lsb_release -rs)
 ros_version="humble" 
 device_type="drone"
 device_index=0
-network_ssid=""
-network_password=""
+
 
 #while getopts i:u:' OPTIONS; do
 #    case $OPTIONS in
@@ -628,7 +549,6 @@ install_build_dependencies
 set_python3_as_default
 install_pip_dependencies
 install_gstreamer
-#prepare_lwan
 
 install_ros2
 trafalgar_workspace
