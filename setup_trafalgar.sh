@@ -309,6 +309,8 @@ trafalgar_service(){
         echo "previous directory has been removed"
     fi  
 
+    mkdir -p "$trafalgar_service_dir"
+    
     cd $trafalgar_workspace
 
     sudo -u "$SUDO_USER" bash -c 'mkdir "services"'
@@ -353,9 +355,9 @@ trafalgar_service(){
 
         # Écriture du contenu dans le fichier de service
         #echo -e $service_content > $service_file
-        ${SUDO} cp $service_file /etc/systemd/user/trafalgar.service
+        sudo -u $SUDO_USER cp $service_file /etc/systemd/user/trafalgar.service
 
-        ${SUDO} systemctl --user enable trafalgar.service
+        sudo -u $SUDO_USER systemctl --user enable trafalgar.service
 
         #autostart file 
         desktop_file=$trafalgar_service_dir/trafalgar.desktop
@@ -378,7 +380,7 @@ trafalgar_service(){
         echo "X-MATE-Autostart-Delay=0"
         } > $desktop_file
 
-        ${SUDO} cp $desktop_file /.config/autostart/trafalgar.desktop
+        sudo -u $SUDO_USER cp $desktop_file /.config/autostart/trafalgar.desktop
 
 
     else 
