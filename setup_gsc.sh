@@ -219,6 +219,35 @@ restart(){
 }
 
 
+create_application_widget(){
+
+
+        desktop_file=$trafalgar_service_dir/gsc.desktop
+        # check file existence
+        if [[ -f $desktop_file ]]; then
+            rm $desktop_file
+            touch $desktop_file
+        fi
+
+
+        {
+            
+        echo "[Desktop Entry]"
+        echo "Type=Application"
+        echo 'Exec=bash -c "source /opt/ros/humble/setup.bash && source $HOME/trafalgar_gsc/install/local_setup.bash && ros2 launch gsc gui_launch.py"'
+        echo "Hidden=false"
+        echo "NoDisplay=false"
+        echo "Name[C]=Naviscope"
+        echo "Name=Naviscope"
+        echo "Icon=/usr/share/icons/manoar_gsc/ico.png"
+
+        } > $desktop_file
+
+        #${SUDO} cp $desktop_file /home/$SUDO_USER/.local/share/application/trafalgar_gsc.desktop
+
+
+
+}
 
 SUDO=""
 if [[ $EUID -ne 0 ]]; then
