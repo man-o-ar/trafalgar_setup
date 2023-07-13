@@ -355,7 +355,8 @@ trafalgar_service(){
         #echo -e $service_content > $service_file
         ${SUDO} cp $service_file /etc/systemd/user/trafalgar.service
 
-         ${SUDO} -u $SUDO_USER systemctl --user enable trafalgar.service
+        sudo loginctl enable-linger "$SUDO_USER" 
+        sudo -u "$SUDO_USER" systemctl --user enable trafalgar.service
 
         #autostart file 
         desktop_file=$trafalgar_service_dir/trafalgar.desktop
@@ -378,7 +379,7 @@ trafalgar_service(){
         echo "X-MATE-Autostart-Delay=0"
         } > $desktop_file
 
-        ${SUDO} cp $desktop_file /.config/autostart/trafalgar.desktop
+        ${SUDO} cp $desktop_file /home/$SUDO_USER/.config/autostart/trafalgar.desktop
 
     else 
        {
