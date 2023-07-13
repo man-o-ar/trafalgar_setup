@@ -326,6 +326,7 @@ trafalgar_service(){
 
     trafalgar_application="rov_app"
 
+
     if [[ $device_type != "drone" ]]
     then
        #user service file
@@ -355,11 +356,14 @@ trafalgar_service(){
         ${SUDO} cp $service_file /etc/systemd/user/trafalgar.service
 
         ${SUDO} systemctl --user enable trafalgar.service
-        ${SUDO} systemctl --user start trafalgar.service
-
 
         #autostart file 
         desktop_file=$trafalgar_service_dir/trafalgar.desktop
+        # check file existence
+        if [[ -f $desktop_file ]]; then
+            rm $desktop_file
+            touch $desktop_file
+        fi
 
         {
         echo "[Desktop Entry]"
@@ -374,7 +378,7 @@ trafalgar_service(){
         echo "X-MATE-Autostart-Delay=0"
         } > $desktop_file
 
-        ${SUDO} cp $service_file /.config/autostart/trafalgar.desktop
+        ${SUDO} cp $desktop_file /.config/autostart/trafalgar.desktop
 
 
     else 
